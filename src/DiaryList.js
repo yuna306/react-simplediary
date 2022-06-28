@@ -1,6 +1,6 @@
 import DiaryItem from "./DiaryItem";
 
-const DiaryList = ({ onDelete, diaryList }) => {
+const DiaryList = ({ onRemove, diaryList, onEdit }) => {
   return (
     <div className="DiaryList">
       <h2>다이어리 리스트</h2>
@@ -11,7 +11,7 @@ const DiaryList = ({ onDelete, diaryList }) => {
         {/* react-jsx-dev-runtime.development.js:99 Warning: Each child in a list
         should have a unique "key" prop. */}
         {diaryList.map((it) => (
-          <DiaryItem key={it.id} {...it} onDelete={onDelete} />
+          <DiaryItem key={it.id} {...it} onRemove={onRemove} onEdit={onEdit} />
         ))}
       </div>
     </div>
