@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 //css 입힐때 컴포넌트의 이름과 className이 정확히 일치되면 편리하니까(강사님 방식)
-const DiaryEditor = () => {
+const DiaryEditor = ({ onCreate }) => {
   const authorInput = useRef();
   const contentInput = useRef();
 
@@ -32,6 +32,14 @@ const DiaryEditor = () => {
       contentInput.current.focus();
       return;
     }
+
+    onCreate(state.author, state.content, state.emotion);
+    alert("저장성공!!");
+    setState({
+      author: "",
+      content: "",
+      emotion: 1,
+    });
   };
 
   return (

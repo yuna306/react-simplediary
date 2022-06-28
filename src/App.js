@@ -1,51 +1,40 @@
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
 import "./App.css";
-
-const dummyList = [
-  {
-    id: 1,
-    author: "해피",
-    content: "해피한 하루",
-    emotion: 1,
-    created_date: new Date().getTime(),
-  },
-  {
-    id: 2,
-    author: "럭키",
-    content: "럭키데이였어요",
-    emotion: 2,
-    created_date: new Date().getTime(),
-  },
-  {
-    id: 3,
-    author: "김철수",
-    content: "영희랑 놀러가야지",
-    emotion: 3,
-    created_date: new Date().getTime(),
-  },
-  {
-    id: 4,
-    author: "굿모닝",
-    content: "미라클모닝을 실천중",
-    emotion: 1,
-    created_date: new Date().getTime(),
-  },
-  {
-    id: 5,
-    author: "파트라슈",
-    content: "파트라슈와 함께걸었던",
-    emotion: 1,
-    created_date: new Date().getTime(),
-  },
-];
+import { useRef, useState } from "react";
 
 function App() {
+  const [data, setData] = useState([]);
+
+  const dataId = useRef(0);
+
+  const onCreate = (author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current,
+    };
+
+    dataId.current += 1;
+    setData([newItem, ...data]);
+  };
+
+  const onDelete = (targetId) => {
+    console.log(`${targetId}번째 게시글이 삭제되었습니다.`);
+    const newDiaryList = data.filter((it) => it.id !== targetId);
+    console.log("newDiaryList");
+    console.log(newDiaryList);
+    setData(newDiaryList);
+  };
+
   return (
     <div className="App">
       <h2>일기장</h2>
-      <DiaryEditor />
-      <DiaryList diaryList={dummyList} />
+      <DiaryEditor onCreate={onCreate} />
+      <DiaryList diaryList={data} onDelete={onDelete} />
     </div>
   );
 }
