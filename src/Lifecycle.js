@@ -15,7 +15,7 @@ dependency array는 빈배열로 둠
 
   /*
 업데이트되는 순간
-state를 바꾸는순간 (setCount로 카운트를 증가시키는 순간 )에 하고싶은일이 있다면
+state를 바꾸는순간 (setCount로 카운트를 증가시키는 순간)에 하고싶은일이 있다면
 dependency array를 전달하지 않음
  */
 
@@ -24,7 +24,8 @@ dependency array를 전달하지 않음
   });
 
   /*dependency array에 있는 값이 변경되는순간 
-useEffect의 콜백함수가 실행 됨  */
+useEffect의 콜백함수가 실행 됨 */
+
   useEffect(() => {
     console.log(`count is update : ${text}`);
   }, [count]);
