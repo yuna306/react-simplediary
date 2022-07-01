@@ -2,6 +2,7 @@ import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
 import "./App.css";
 import { useEffect, useRef, useState } from "react";
+import OptimizeTest from "./OptimizeTest";
 import Lifecycle from "./Lifecycle";
 
 function App() {
@@ -69,6 +70,8 @@ function App() {
     <div className="App">
       <h2>일기장</h2>
       {/* <Lifecycle /> */}
+
+      <OptimizeTest />
       <DiaryEditor onCreate={onCreate} />
       <DiaryList onEdit={onEdit} diaryList={data} onRemove={onRemove} />
     </div>
