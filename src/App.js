@@ -1,7 +1,7 @@
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
 import "./App.css";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 // import OptimizeTest from "./OptimizeTest";
 // import Lifecycle from "./Lifecycle";
 
@@ -36,7 +36,31 @@ function App() {
     getData();
   }, []);
 
-  const onCreate = (author, content, emotion) => {
+  /*함수형업데이트*/
+
+  /*useCallback을 사용하면서 dependency array를 []로 두게되면
+  새글 작성시, 기존일기가 사라지고 새로작성한 새글만 남게됨
+
+  onCreate함수는 컴포넌트가 마운트되는 시점에 한번만 생성됨
+  그 시점의 data state 값이 빈배열이였음.
+  즉, onCreate가  가장 마지막에 생성되었을 때 data state가 [] 이란 뜻임
+
+  함수는 컴퍼넌트가 재생성될때 다시생성되는 이유가 있음
+  현재의 state값을 참조할 수 있어야 하므로..
+
+  정상적으로 작동시키려면? 아래와 같이 data를 넣어줘야함
+  const onCreate = useCallback((author, content, emotion) => {중략...  }, [data]);
+  
+  [data]가 변경되게되면 함수를 재생성함...
+  결론적으로 원하는 동작이 안 됨.
+
+  data state가 변한다고 해서, onCreate가 재생성 되는걸 막고자 하는걸 원했으니까.
+  그런데 , onCreate가 재생성 되지 않으면 최신의  data state 값을 참조할 수 가 없어서 또 새글 한개만 남음;;
+
+  이럴 때 함수형 업데이트를 사용하면 됨!
+  
+ 기존코드
+  const onCreate = useCallback((author, content, emotion) => {
     const created_date = new Date().getTime();
     const newItem = {
       author,
@@ -48,7 +72,29 @@ function App() {
 
     dataId.current += 1;
     setData([newItem, ...data]);
-  };
+  }, []);
+ 
+  */
+
+  //함수형 업데이트
+  //setState에 '값'이 아닌 '함수'를 전달하는 것을 함수형 업데이트라고 함
+  //인자(data)를 받아서 아이템을 추가한 데이터를 리턴하는 함수를 전달하게되면
+  //dependency array를 []로 두어도 항상 최신의 state를 인자를 통해 참조할 수 있게 됨
+
+  // setData((data) => [newItem, ...data])
+  const onCreate = useCallback((author, content, emotion) => {
+    const created_date = new Date().getTime();
+    const newItem = {
+      author,
+      content,
+      emotion,
+      created_date,
+      id: dataId.current,
+    };
+
+    dataId.current += 1;
+    setData((data) => [newItem, ...data]);
+  }, []);
 
   const onRemove = (targetId) => {
     console.log(`${targetId}번째 게시글이 삭제되었습니다.`);
