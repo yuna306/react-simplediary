@@ -1,8 +1,18 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+
+/*2022-07-02*/
+// 리액트 최적화하기
+//1) react.memo로 컴포넌트를  묶어주기
+//2) useEffect를 이용하여 어떤 아이템이 리렌더링이 일어나는지 확인해보기
+//3)
 
 const DiaryItem = ({ ...items }) => {
   const { onEdit, onRemove, id, author, content, emotion, created_date } =
     items;
+
+  useEffect(() => {
+    console.log(`${id}번째 아이템 렌더`);
+  });
 
   const [isEdit, setIsEdit] = useState(false);
 
@@ -74,4 +84,4 @@ const DiaryItem = ({ ...items }) => {
   );
 };
 
-export default DiaryItem;
+export default React.memo(DiaryItem);

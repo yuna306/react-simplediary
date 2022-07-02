@@ -76,10 +76,10 @@ function App() {
  
   */
 
-  //함수형 업데이트
-  //setState에 '값'이 아닌 '함수'를 전달하는 것을 함수형 업데이트라고 함
-  //인자(data)를 받아서 아이템을 추가한 데이터를 리턴하는 함수를 전달하게되면
-  //dependency array를 []로 두어도 항상 최신의 state를 인자를 통해 참조할 수 있게 됨
+  // 함수형 업데이트
+  // setState에 '값'이 아닌 '함수'를 전달하는 것을 함수형 업데이트라고 함
+  // 인자(data)를 받아서 새 아이템을 추가한 data를 리턴하는 함수를 전달하게되면
+  // dependency array를 []로 두어도 항상 최신의 state를 인자를 통해 참조할 수 있게 됨
 
   // setData((data) => [newItem, ...data])
   const onCreate = useCallback((author, content, emotion) => {
@@ -96,21 +96,23 @@ function App() {
     setData((data) => [newItem, ...data]);
   }, []);
 
-  const onRemove = (targetId) => {
+  //삭제할때마다 모든 아이템이 리렌더링 됨=>useCallback으로 감싸주고
+  //setState 함수형 업데이트로 최적화
+  const onRemove = useCallback((targetId) => {
     console.log(`${targetId}번째 게시글이 삭제되었습니다.`);
-    const newDiaryList = data.filter((it) => it.id !== targetId);
-    console.log("newDiaryList");
-    console.log(newDiaryList);
-    setData(newDiaryList);
-  };
 
-  const onEdit = (targetId, newContent) => {
-    setData(
-      data.map((it) =>
+    // const newDiaryList = data.filter((it) => it.id !== targetId);
+    // setData(newDiaryList);
+    setData((data) => data.filter((it) => it.id !== targetId));
+  }, []);
+
+  const onEdit = useCallback((targetId, newContent) => {
+    setData((data) => {
+      return data.map((it) =>
         it.id === targetId ? { ...it, content: newContent } : it
-      )
-    );
-  };
+      );
+    });
+  }, []);
 
   /*어떤 함수가 있고 그 함수가 어떤 값을 리턴하고 있을 때 리턴까지의 연산을 최적화 하고싶다면? 
   useMemo를 사용하여 dependency array에 어떤 값이 변화할때 연산을 다시 수행할것인지 명시해 주면 됨
