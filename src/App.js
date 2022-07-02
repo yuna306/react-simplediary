@@ -1,12 +1,51 @@
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
 import "./App.css";
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useEffect, useRef, useMemo, useCallback, useReducer } from "react";
 // import OptimizeTest from "./OptimizeTest";
 // import Lifecycle from "./Lifecycle";
 
-function App() {
-  const [data, setData] = useState([]);
+// 상태변화 로직을 APP 컴포넌트 바깥으로 분리
+//상태변화가 일어나기 직전의 state / 어떤 상태변화를 일으켜야하는지 정보가 담긴 action 객체
+//dispatch를 호출하면 reducer가 실행되고 return하는 값이 새로운 상태가 됨
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "INIT": {
+      return action.data;
+    }
+
+    case "CREATE": {
+      const created_date = new Date().getTime();
+      const newItem = {
+        ...action.data, // data: { author, content, emotion, id: dataId.current }
+        created_date,
+      };
+      return [newItem, ...state];
+    }
+
+    case "REMOVE":
+      return state.filter((it) => it.id !== action.targetId);
+
+    case "EDIT": {
+      return state.map((it) =>
+        it.id === action.targetId ? { ...it, content: action.newContent } : it
+      );
+    }
+
+    default:
+      return state;
+  }
+};
+
+const App = () => {
+  //22-07-02
+  //useState => useReducer로 변경
+  //const [data, setData] = useState([]);
+
+  //dispatch로 호출하면 useCallback을 사용하면서 dependency array를 []로 둘 때
+  //문제가 생기는지 고려할 필요 없음. 그냥 호출하면 알아서 현재의 state를 reducer함수가 참조
+  const [data, dispatch] = useReducer(reducer, []);
 
   const dataId = useRef(0);
 
@@ -29,7 +68,8 @@ function App() {
         id: dataId.current++,
       };
     });
-    setData(initData);
+    dispatch({ type: "INIT", data: initData });
+    //setData(initData);
   };
 
   useEffect(() => {
@@ -83,35 +123,46 @@ function App() {
 
   // setData((data) => [newItem, ...data])
   const onCreate = useCallback((author, content, emotion) => {
-    const created_date = new Date().getTime();
-    const newItem = {
-      author,
-      content,
-      emotion,
-      created_date,
-      id: dataId.current,
-    };
-
+    dispatch({
+      type: "CREATE",
+      data: { author, content, emotion, id: dataId.current },
+    });
     dataId.current += 1;
-    setData((data) => [newItem, ...data]);
+
+    // const created_date = new Date().getTime();
+    // const newItem = {
+    // author,
+    // content,
+    // emotion,
+    // created_date,
+    //   id: dataId.current,
+    // };
+
+    // dataId.current += 1;
+    // setData((data) => [newItem, ...data]);
   }, []);
 
   //삭제할때마다 모든 아이템이 리렌더링 됨=>useCallback으로 감싸주고
   //setState 함수형 업데이트로 최적화
   const onRemove = useCallback((targetId) => {
-    console.log(`${targetId}번째 게시글이 삭제되었습니다.`);
+    dispatch({ type: "REMOVE", targetId });
 
+    //불필요한 렌더가 반복되는 최적화 이전 코드
     // const newDiaryList = data.filter((it) => it.id !== targetId);
     // setData(newDiaryList);
-    setData((data) => data.filter((it) => it.id !== targetId));
+
+    //reducer사용 이전 코드
+    //setData((data) => data.filter((it) => it.id !== targetId));
   }, []);
 
   const onEdit = useCallback((targetId, newContent) => {
-    setData((data) => {
-      return data.map((it) =>
-        it.id === targetId ? { ...it, content: newContent } : it
-      );
-    });
+    dispatch({ type: "EDIT", targetId, newContent });
+    //reducer사용 이전 코드
+    // setData((data) => {
+    //   return data.map((it) =>
+    //     it.id === targetId ? { ...it, content: newContent } : it
+    //   );
+    // });
   }, []);
 
   /*어떤 함수가 있고 그 함수가 어떤 값을 리턴하고 있을 때 리턴까지의 연산을 최적화 하고싶다면? 
@@ -141,6 +192,6 @@ function App() {
       <DiaryList onEdit={onEdit} diaryList={data} onRemove={onRemove} />
     </div>
   );
-}
+};
 
 export default App;
